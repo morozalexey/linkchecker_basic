@@ -6,7 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -14,7 +14,7 @@ $config = [
     'components' => [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '6pdx6w7sb0kc288Ho1CvDLXPYV5KdB6W',
+            'cookieValidationKey' => 'hSb2Ndt9f-jd-EaYHvfqLieea6qE5UwS',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -25,7 +25,7 @@ $config = [
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',
-        ],
+        ],        
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             // send all mails to a file by default. You have to set
@@ -43,14 +43,23 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
+        'queue' => [
+            'class' => \yii\queue\db\Queue::class,
+            'db' => 'db', // DB connection component or its config 
+            'tableName' => '{{%queue}}', // Table name
+            'channel' => 'default', // Queue channel key
+            'mutex' => \yii\mutex\MysqlMutex::class, // Mutex used to sync queries
+        ],
+        
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'site/index',
+                '<action>'=>'site/<action>',
             ],
         ],
-        */
+        
     ],
     'params' => $params,
 ];
