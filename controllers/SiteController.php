@@ -9,6 +9,9 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\Links;
+use app\models\LinksJob;
+use app\helpers\MyHelper;
 
 class SiteController extends Controller
 {
@@ -61,7 +64,9 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        //return $this->render('index');
+        $model = new Links();
+        return $this->render('index', ['model' => $model]);
     }
 
     /**
@@ -124,5 +129,45 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+
+
+    public function actionAdmin()
+    {   
+        $model = new Links();
+        $links = Links::find()->orderBy('created_at')->all();
+        return $this->render('admin', ['links' => $links]);
+    }
+
+    public function actionCheck()
+    {
+        $model = new Links();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            
+            $url = $model->link;
+            $repeating = $model->repeating;
+            $period = $model->period;
+            $status = "Проверяем $url";
+            $result = MyHelper::checkLink($url);            
+            $httpCode = $result['httpCode'];
+
+            if (Yii::$app->queue->delay(10)->push(new LinksJob([
+                'link' => $url,
+                'repeating' => $repeating,
+                'period' => $period,
+                'http' => $httpCode,
+                'created_at'=> (new \DateTime('now', new \DateTimeZone('Europe/Moscow')))->format('Y-m-d H:i:s'),
+            ]))) {                
+                $queue = Yii::$app->queue; 
+                $queue->run(false);                
+                return $this->render('index', ['model' => $model, 'status' => $status]);
+            } else {
+                $status = "Ошибка проверки $url";
+                return $this->render('index', ['model' => $model, 'status' => $status]);
+            }
+        } else {
+            return $this->render('index', ['model' => $model]);
+        }
     }
 }

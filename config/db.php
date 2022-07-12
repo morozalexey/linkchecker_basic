@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=localhost;dbname=yii2basic',
+    'class' => \yii\db\Connection::class,
+    'dsn' => 'mysql:host=localhost;dbname=links_basic',
     'username' => 'root',
-    'password' => '',
+    'password' => 'root',
     'charset' => 'utf8',
 
     // Schema cache options (for production environment)
