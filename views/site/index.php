@@ -12,7 +12,7 @@ for ($i=0; $i <=10 ; $i++) {
 }?>
 
 <?php if (isset($status)) : ?>
-   <h2><?=$status?></h2> <br>;
+   <h2><?php echo $status ?></h2> <br>;
     <a href="/index.php" class="btn btn-success">Проверить ещё одну ссылку</a>  
 <?php else : ?>
 <?php $form = ActiveForm::begin(['action' => '/index.php?r=site/check']) ?>
