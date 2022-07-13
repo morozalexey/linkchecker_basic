@@ -11,7 +11,6 @@ use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\Links;
 use app\models\LinksJob;
-use app\helpers\MyHelper;
 
 class SiteController extends Controller
 {
@@ -64,7 +63,6 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        //return $this->render('index');
         $model = new Links();
         return $this->render('index', ['model' => $model]);
     }
@@ -134,8 +132,7 @@ class SiteController extends Controller
 
     public function actionAdmin()
     {   
-        $model = new Links();
-        $links = Links::find()->orderBy('created_at')->all();
+        $links = Links::find()->orderBy(['created_at' => SORT_DESC])->all();
         return $this->render('admin', ['links' => $links]);
     }
 
@@ -148,19 +145,18 @@ class SiteController extends Controller
             $url = $model->link;
             $repeating = $model->repeating;
             $period = $model->period;
-            $status = "Проверяем $url";
-            $result = MyHelper::checkLink($url);            
-            $httpCode = $result['httpCode'];
+            $model->created_at = (new \DateTime('now', new \DateTimeZone('Europe/Moscow')))->format('Y-m-d H:i:s');
+            $model->save();
 
-            if (Yii::$app->queue->delay(10)->push(new LinksJob([
+            $id = $model->id;
+
+            if (Yii::$app->queue->delay(5)->push(new LinksJob([
+                'id' => $id,
                 'link' => $url,
                 'repeating' => $repeating,
-                'period' => $period,
-                'http' => $httpCode,
-                'created_at'=> (new \DateTime('now', new \DateTimeZone('Europe/Moscow')))->format('Y-m-d H:i:s'),
-            ]))) {                
-                $queue = Yii::$app->queue; 
-                $queue->run(false);                
+                'period' => $period,               
+            ]))) {               
+                $status = "Проверяем $url";
                 return $this->render('index', ['model' => $model, 'status' => $status]);
             } else {
                 $status = "Ошибка проверки $url";

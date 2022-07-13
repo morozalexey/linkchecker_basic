@@ -50,7 +50,7 @@ $config = [
             'channel' => 'default', // Queue channel key
             'mutex' => \yii\mutex\MysqlMutex::class, // Mutex used to sync queries
         ],
-        
+        /*
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
@@ -59,6 +59,7 @@ $config = [
                 '<action>'=>'site/<action>',
             ],
         ],
+        */
         
     ],
     'params' => $params,
